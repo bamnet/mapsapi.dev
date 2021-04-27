@@ -13,21 +13,17 @@ npm install
 To create a production build:
 
 ```sh
-npm run build-prod
+npm run build
 ```
 
 To create a development build:
 
 ```sh
-npm run build-dev
+npm run build:dev
 ```
 
 ## Running
 
 ```sh
-node dist/bundle.js
+npm run start
 ```
-
-## Credits
-
-Made with [createapp.dev](https://createapp.dev/)
