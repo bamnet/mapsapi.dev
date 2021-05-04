@@ -14,6 +14,7 @@
   },
   "devDependencies": {
     "@maxim_mazurok/gapi.client.apikeys": "^2.0.20210426",
+    "@tailwindcss/forms": "^0.3.2",
     "@types/gapi": "^0.0.39",
     "@types/gapi.auth2": "^0.0.54",
     "@types/gapi.client.cloudresourcemanager": "^2.0.0",

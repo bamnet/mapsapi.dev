@@ -54,7 +54,20 @@ function authChange() {
         //     console.log(`But only ${res.length} have maps`);
         // });
         // getKey();
-        projectSummary();
+        projectSummary().then((projects) => {
+            console.log(projects.keys);
+            const select = <HTMLSelectElement>document.getElementById('projects');
+            if (Object.keys(projects).length <= 0) {
+                return;
+            }
+            select.innerHTML = ''; // Remove the placeholder
+            Object.keys(projects).forEach(project => {
+                const opt = document.createElement('option');
+                opt.value = project;
+                opt.innerHTML = project;
+                select.appendChild(opt);
+            });
+        });
     } else {
         btn.innerHTML = 'Sign In';
     }
@@ -71,13 +84,12 @@ async function listProjects() {
 
 async function projectSummary() {
     const projects = await listProjects();
-    const idx = await projects.reduce(async (obj, proj: any) => {
+    return await projects.reduce(async (obj, proj: any) => {
         const projectNumber: string = proj.projectNumber;
         const allowed = await allowedSites(projectNumber);
         obj.then(obj => obj[projectNumber] = allowed);
         return obj;
     }, Promise.resolve(<{ [key: string]: string[] }>{}));
-    console.log(idx);
 }
 
 async function allowedSites(projectNumber: string) {
