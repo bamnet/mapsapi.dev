@@ -55,16 +55,17 @@ function authChange() {
         // });
         // getKey();
         projectSummary().then((projects) => {
-            console.log(projects.keys);
+            console.log(projects);
             const select = <HTMLSelectElement>document.getElementById('projects');
             if (Object.keys(projects).length <= 0) {
                 return;
             }
             select.innerHTML = ''; // Remove the placeholder
-            Object.keys(projects).forEach(project => {
+            Object.keys(projects).forEach((number) => {
+                const summary = projects[number];
                 const opt = document.createElement('option');
-                opt.value = project;
-                opt.innerHTML = project;
+                opt.value = number;
+                opt.innerHTML = summary.project.name;
                 select.appendChild(opt);
             });
         });
@@ -73,23 +74,30 @@ function authChange() {
     }
 }
 
+interface CloudProject {
+    name: string;
+    number: string;
+}
+
 async function listProjects() {
     const projectResp = await gapi.client.cloudresourcemanager.projects.list();
-    const projects = projectResp.result.projects || [];
+    const projects = (projectResp.result.projects || []).map(
+        (p: any) => (<CloudProject>{ name: p.name, number: p.projectNumber })
+    );
 
     console.log(`Found ${projects.length} projects`);
 
-    return asyncFilter(projects, async (project: any) => await hasMaps(`projects/${project.projectNumber}`));
+    return asyncFilter(projects, async (project) => await hasMaps(`projects/${project.number}`));
 }
 
 async function projectSummary() {
     const projects = await listProjects();
-    return await projects.reduce(async (obj, proj: any) => {
-        const projectNumber: string = proj.projectNumber;
+    return await projects.reduce(async (obj, proj) => {
+        const projectNumber: string = proj.number;
         const allowed = await allowedSites(projectNumber);
-        obj.then(obj => obj[projectNumber] = allowed);
+        obj.then(obj => obj[projectNumber] = { sites: allowed, project: proj });
         return obj;
-    }, Promise.resolve(<{ [key: string]: string[] }>{}));
+    }, Promise.resolve(<{ [key: string]: { sites: string[]; project: CloudProject; } }>{}));
 }
 
 async function allowedSites(projectNumber: string) {
@@ -146,8 +154,8 @@ function getKey() {
     // TODO(bamnet): Don't hardcode the project.
     gapi.client.apikeys.projects.locations.keys.list(
         { parent: 'projects/maps-api-key-252319/locations/global' }
-    ).then((response: any) => {
-        const results = <gapi.client.apikeys.V2ListKeysResponse>response.result;
+    ).then((response) => {
+        const results = response.result;
         console.log(results);
 
         if (results.keys && results.keys?.length > 0) {
@@ -156,8 +164,8 @@ function getKey() {
                 { name: keyName });
         }
         throw '';
-    }).then((response: any) => {
-        const result = <gapi.client.apikeys.V2GetKeyStringResponse>response.result;
+    }).then((response) => {
+        const result = response.result;
         const elem = document.getElementById('key')!;
         elem.innerHTML = result.keyString || '';
     });
