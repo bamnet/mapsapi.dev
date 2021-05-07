@@ -71,7 +71,7 @@ function authChange() {
                     const siteElem = <HTMLSpanElement>document.getElementById('site');
                     const sites = summary.keys[0].sites;
                     if (sites.length >= 1) {
-                        siteElem.innerText = sites[0];
+                        siteElem.innerHTML = sites.join('<br>');
                     } else {
                         siteElem.innerText = 'anywhere';
                     }
@@ -143,6 +143,9 @@ async function listKeys(projectNumber: string) {
 
 // hasMaps returns true if a project has a Maps API enabled.
 async function hasMaps(project: string) {
+    // if(project != 'projects/222519753331') {
+    //     return false;
+    // }
     const serviceResp = await gapi.client.serviceusage.services.list({
         parent: project,
         filter: 'state:ENABLED',
