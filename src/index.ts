@@ -60,14 +60,21 @@ function authChange() {
             if (Object.keys(projects).length <= 0) {
                 return;
             }
+            
+            let selected = '';
+
             select.innerHTML = ''; // Remove the placeholder
             Object.keys(projects).forEach((number) => {
+                if (selected == '') {
+                    selected = number;
+                    getKey(number);
+                }
                 const summary = projects[number];
                 const opt = document.createElement('option');
                 opt.value = number;
                 opt.innerHTML = summary.project.name;
                 select.appendChild(opt);
-            });
+            });            
         });
     } else {
         btn.innerHTML = 'Sign In';
@@ -84,8 +91,6 @@ async function listProjects() {
     const projects = (projectResp.result.projects || []).map(
         (p: any) => (<CloudProject>{ name: p.name, number: p.projectNumber })
     );
-
-    console.log(`Found ${projects.length} projects`);
 
     return asyncFilter(projects, async (project) => await hasMaps(`projects/${project.number}`));
 }
@@ -149,11 +154,9 @@ async function hasMaps(project: string) {
     return services.some((service) => maps_apis.includes(service));
 }
 
-function getKey() {
-    allowedSites('maps-api-key-252319');
-    // TODO(bamnet): Don't hardcode the project.
+function getKey(projectNumber: string) {
     gapi.client.apikeys.projects.locations.keys.list(
-        { parent: 'projects/maps-api-key-252319/locations/global' }
+        { parent: `projects/${projectNumber}/locations/global` }
     ).then((response) => {
         const results = response.result;
         console.log(results);
