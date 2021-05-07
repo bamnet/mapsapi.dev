@@ -50,13 +50,9 @@ function authChange() {
     const user = googleAuth.currentUser.get();
     if (user.hasGrantedScopes(SCOPE)) {
         btn.innerHTML = 'Sign Out';
-        // listProjects().then((res) => {
-        //     console.log(`But only ${res.length} have maps`);
-        // });
-        // getKey();
         projectSummary().then((projects) => {
-            console.log(projects);
-            const select = <HTMLSelectElement>document.getElementById('projects');
+            // console.log(projects);
+            const select = <HTMLSpanElement>document.getElementById('projects');
             if (Object.keys(projects).length <= 0) {
                 return;
             }
@@ -65,15 +61,22 @@ function authChange() {
 
             select.innerHTML = ''; // Remove the placeholder
             Object.keys(projects).forEach((number) => {
+                const summary = projects[number];
                 if (selected == '') {
                     selected = number;
-                    getKey(number);
+                    select.innerText = summary.name;
+
+                    showKey(summary.keys[0].name);
+
+                    const siteElem = <HTMLSpanElement>document.getElementById('site');
+                    const sites = summary.keys[0].sites;
+                    if (sites.length >= 1) {
+                        siteElem.innerText = sites[0];
+                    } else {
+                        siteElem.innerText = 'anywhere';
+                    }
                 }
-                const summary = projects[number];
-                const opt = document.createElement('option');
-                opt.value = number;
-                opt.innerHTML = summary.project.name;
-                select.appendChild(opt);
+                
             });            
         });
     } else {
@@ -84,12 +87,18 @@ function authChange() {
 interface CloudProject {
     name: string;
     number: string;
+    keys: Key[];
+}
+
+interface Key {
+    name: string;
+    sites: string[];
 }
 
 async function listProjects() {
     const projectResp = await gapi.client.cloudresourcemanager.projects.list();
     const projects = (projectResp.result.projects || []).map(
-        (p: any) => (<CloudProject>{ name: p.name, number: p.projectNumber })
+        (p: any) => (<CloudProject>{ name: p.name, number: p.projectNumber, keys: [] })
     );
 
     return asyncFilter(projects, async (project) => await hasMaps(`projects/${project.number}`));
@@ -98,14 +107,13 @@ async function listProjects() {
 async function projectSummary() {
     const projects = await listProjects();
     return await projects.reduce(async (obj, proj) => {
-        const projectNumber: string = proj.number;
-        const allowed = await allowedSites(projectNumber);
-        obj.then(obj => obj[projectNumber] = { sites: allowed, project: proj });
+        proj.keys = await listKeys(proj.number);
+        obj.then(obj => obj[proj.number] = proj );
         return obj;
-    }, Promise.resolve(<{ [key: string]: { sites: string[]; project: CloudProject; } }>{}));
+    }, Promise.resolve(<{ [key: string]: CloudProject; }>{}));
 }
 
-async function allowedSites(projectNumber: string) {
+async function listKeys(projectNumber: string) {
     const keys = await gapi.client.apikeys.projects.locations.keys.list(
         { parent: `projects/${projectNumber}/locations/global` }
     );
@@ -114,8 +122,8 @@ async function allowedSites(projectNumber: string) {
         return [];
     }
 
-    const restrictions: string[] = [];
-    keys.result.keys.forEach((key) => {
+    return keys.result.keys.map((key) => {
+        const restrictions: string[] = [];
         if (key.restrictions?.androidKeyRestrictions?.allowedApplications) {
             key.restrictions.androidKeyRestrictions.allowedApplications.forEach(a => {
                 if (a.packageName) {
@@ -129,9 +137,8 @@ async function allowedSites(projectNumber: string) {
         if (key.restrictions?.iosKeyRestrictions?.allowedBundleIds) {
             restrictions.push(...key.restrictions.iosKeyRestrictions.allowedBundleIds);
         }
+        return <Key>{name: key.name, sites: restrictions};
     });
-
-    return restrictions;
 }
 
 // hasMaps returns true if a project has a Maps API enabled.
@@ -154,20 +161,9 @@ async function hasMaps(project: string) {
     return services.some((service) => maps_apis.includes(service));
 }
 
-function getKey(projectNumber: string) {
-    gapi.client.apikeys.projects.locations.keys.list(
-        { parent: `projects/${projectNumber}/locations/global` }
-    ).then((response) => {
-        const results = response.result;
-        console.log(results);
-
-        if (results.keys && results.keys?.length > 0) {
-            const keyName = results.keys[0].name || '';
-            return gapi.client.apikeys.projects.locations.keys.getKeyString(
-                { name: keyName });
-        }
-        throw '';
-    }).then((response) => {
+function showKey(keyName: string) {
+    gapi.client.apikeys.projects.locations.keys.getKeyString(
+                { name: keyName }).then((response) => {
         const result = response.result;
         const elem = document.getElementById('key')!;
         elem.innerHTML = result.keyString || '';
