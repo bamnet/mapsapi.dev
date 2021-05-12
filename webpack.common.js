@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
@@ -36,6 +37,12 @@ module.exports = {
       filename: 'index.html', // output file
     }),
     new MiniCssExtractPlugin(),
+    new webpack.EnvironmentPlugin({
+      // These defaults belong to https://console.cloud.google.com/apis/credentials?project=console-311523
+      // and are suitable only for local development.
+      API_KEY: 'AIzaSyByDFeQu8GObexTfwDf4n5xKxSyx3QCARg',
+      CLIENT_ID: '822692363328-ukj4juardgrhh9bh7rhr5i46dphn3h8e.apps.googleusercontent.com',
+    })
   ],
   optimization: {
     minimize: true,

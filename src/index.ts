@@ -7,9 +7,8 @@ const CLOUD_RESOURCE_MANAGER_API_DISCOVERY = 'https://cloudresourcemanager.googl
 const SERVICE_USAGE_API_DISCOVERY = 'https://serviceusage.googleapis.com/$discovery/rest?version=v1';
 const SCOPE = 'https://www.googleapis.com/auth/cloud-platform.read-only';
 
-// TODO(bamnet): Move the key and client id to configs.
-const API_KEY = 'AIzaSyByDFeQu8GObexTfwDf4n5xKxSyx3QCARg';
-const CLIENT_ID = '822692363328-ukj4juardgrhh9bh7rhr5i46dphn3h8e.apps.googleusercontent.com';
+const API_KEY = process.env.API_KEY;
+const CLIENT_ID = process.env.CLIENT_ID;
 
 let googleAuth: gapi.auth2.GoogleAuth;
 
