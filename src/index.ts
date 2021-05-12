@@ -1,5 +1,3 @@
-/// <reference types="@maxim_mazurok/gapi.client.apikeys" />
-
 import './styles/main.css'
 
 import { asyncFilter } from './util';
@@ -50,12 +48,18 @@ function authChange() {
     const user = googleAuth.currentUser.get();
     if (user.hasGrantedScopes(SCOPE)) {
         btn.innerHTML = 'Sign Out';
+        document.getElementById('signed-out')?.remove();
         projectSummary().then((projects) => {
-            // console.log(projects);
             const select = <HTMLSpanElement>document.getElementById('projects');
             if (Object.keys(projects).length <= 0) {
+                document.getElementById('auth-details')!.style.display = 'none';
+                document.getElementById('no-projects')!.style.display = '';
+                document.getElementById('key')!.innerHTML = '...';
                 return;
             }
+
+            document.getElementById('auth-details')!.style.display = '';
+            document.getElementById('no-projects')!.style.display = 'none';
             
             let selected = '';
 
@@ -168,8 +172,7 @@ function showKey(keyName: string) {
     gapi.client.apikeys.projects.locations.keys.getKeyString(
                 { name: keyName }).then((response) => {
         const result = response.result;
-        const elem = document.getElementById('key')!;
-        elem.innerHTML = result.keyString || '';
+        document.getElementById('key')!.innerHTML = result.keyString || '';
     });
 }
 
@@ -177,8 +180,7 @@ function handleAuthClick() {
     if (googleAuth.isSignedIn.get()) {
         // Don't just sign out, revoke the authorization entirely.
         googleAuth.disconnect();
-        const elem = document.getElementById('key')!;
-        elem.innerHTML = '...'
+        document.getElementById('key')!.innerHTML = '...';
     } else {
         googleAuth.signIn();
     }
