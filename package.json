@@ -1,11 +1,11 @@
 {
-  "name": "apikey",
+  "name": "mapsapi.dev",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "scripts": {
     "build:dev": "webpack --config webpack.dev.js",
     "build": "webpack --node-env=production --config webpack.prod.js",
