@@ -16,6 +16,17 @@ function init() {
     const btn = <HTMLButtonElement>document.getElementById('auth');
     btn.onclick = handleAuthClick;
 
+    const modalContinue = <HTMLButtonElement>document.getElementById('continue');
+    modalContinue.onclick = () => {
+        document.getElementById('modal')!.classList.add('hidden');
+        googleAuth.signIn();
+    };
+
+    const modalCancel = <HTMLButtonElement>document.getElementById('cancel');
+    modalCancel.onclick = () => {
+        document.getElementById('modal')!.classList.add('hidden');
+    };
+
     const script = document.createElement('script');
     script.src = 'https://apis.google.com/js/api.js';
     script.onload = () => {
@@ -181,7 +192,8 @@ function handleAuthClick() {
         googleAuth.disconnect();
         document.getElementById('key')!.innerHTML = '...';
     } else {
-        googleAuth.signIn();
+        const modal = document.getElementById('modal')!;
+        modal.classList.remove('hidden');
     }
 }
 
