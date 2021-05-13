@@ -7,6 +7,7 @@ const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 module.exports = {
   entry: {
     main: './src/index.ts',
+    privacy: './src/privacy.ts',
   },
   output: {
     path: path.resolve(__dirname, './dist'),
@@ -34,7 +35,13 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, './src/template.html'), // template file
-      filename: 'index.html', // output file
+      filename: 'index.html',  // output file
+      chunks: ['main'],
+    }),
+    new HtmlWebpackPlugin({
+      template: path.resolve(__dirname, './src/privacy.html'),
+      filename: 'privacy.html',
+      chunks: ['privacy'],
     }),
     new MiniCssExtractPlugin(),
     new webpack.EnvironmentPlugin({
