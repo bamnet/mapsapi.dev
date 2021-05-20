@@ -58,7 +58,9 @@ function authChange() {
     const user = googleAuth.currentUser.get();
     if (user.hasGrantedScopes(SCOPE)) {
         btn.innerHTML = 'Sign Out';
-        document.getElementById('signed-out')?.remove();
+        document.querySelectorAll('.signed-out').forEach((e) => {
+            e.classList.add('hidden');
+        });
         projectSummary().then((projects) => {
             const select = <HTMLSpanElement>document.getElementById('projects');
             if (Object.keys(projects).length <= 0) {
@@ -95,6 +97,9 @@ function authChange() {
         });
     } else {
         btn.innerHTML = 'Sign In';
+        document.querySelectorAll('.signed-out').forEach((e) => {
+            e.classList.remove('hidden');
+        });
     }
 }
 
