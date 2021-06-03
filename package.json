@@ -10,7 +10,7 @@
     "build:dev": "webpack --config webpack.dev.js",
     "build": "webpack --node-env=production --config webpack.prod.js",
     "start": "webpack serve --open --config webpack.dev.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "ts-node node_modules/jasmine/bin/jasmine --config=jasmine.json"
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.3.2",
@@ -19,15 +19,18 @@
     "@types/gapi.client.apikeys": "^2.0.0",
     "@types/gapi.client.cloudresourcemanager": "^2.0.0",
     "@types/gapi.client.serviceusage": "^1.0.0",
+    "@types/jasmine": "^3.7.6",
     "autoprefixer": "^10.2.5",
     "css-loader": "^5.2.4",
     "css-minimizer-webpack-plugin": "^2.0.0",
     "html-webpack-plugin": "^5.3.1",
+    "jasmine": "^3.7.0",
     "mini-css-extract-plugin": "^1.5.0",
     "postcss": "^8.2.13",
     "postcss-loader": "^5.2.0",
     "tailwindcss": "^2.1.2",
     "ts-loader": "^9.1.1",
+    "ts-node": "^10.0.0",
     "typescript": "^4.2.4",
     "webpack": "^5.35.1",
     "webpack-cli": "^4.6.0",

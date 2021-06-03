@@ -1,5 +1,6 @@
 import './styles/main.css'
 
+import { hasMaps } from './cloud';
 import { asyncFilter } from './util';
 
 const API_KEY_API_DISCOVERY = 'https://apikeys.googleapis.com/$discovery/rest?version=v2';
@@ -72,7 +73,7 @@ function authChange() {
 
             document.getElementById('auth-details')!.style.display = '';
             document.getElementById('no-projects')!.style.display = 'none';
-            
+
             let selected = '';
 
             select.innerHTML = ''; // Remove the placeholder
@@ -92,8 +93,8 @@ function authChange() {
                         siteElem.innerText = 'anywhere';
                     }
                 }
-                
-            });            
+
+            });
         });
     } else {
         btn.innerHTML = 'Sign In';
@@ -127,7 +128,7 @@ async function projectSummary() {
     const projects = await listProjects();
     return await projects.reduce(async (obj, proj) => {
         proj.keys = await listKeys(proj.number);
-        obj.then(obj => obj[proj.number] = proj );
+        obj.then(obj => obj[proj.number] = proj);
         return obj;
     }, Promise.resolve(<{ [key: string]: CloudProject; }>{}));
 }
@@ -156,39 +157,16 @@ async function listKeys(projectNumber: string) {
         if (key.restrictions?.iosKeyRestrictions?.allowedBundleIds) {
             restrictions.push(...key.restrictions.iosKeyRestrictions.allowedBundleIds);
         }
-        return <Key>{name: key.name, sites: restrictions};
+        return <Key>{ name: key.name, sites: restrictions };
     });
-}
-
-// hasMaps returns true if a project has a Maps API enabled.
-async function hasMaps(project: string) {
-    // if(project != 'projects/222519753331') {
-    //     return false;
-    // }
-    const serviceResp = await gapi.client.serviceusage.services.list({
-        parent: project,
-        filter: 'state:ENABLED',
-        fields: 'services.name',
-    });
-
-    const services = (serviceResp.result.services || []).map((s) => (s.name!.slice(`${project}/services/`.length)));
-    const maps_apis = [
-        // TODO(bamnet): This list is woefully inadequate.
-        'geocoding-backend.googleapis.com',
-        'maps-backend.googleapis.com',
-        'elevation-backend.googleapis.com',
-        'timezone-backend.googleapis.com',
-    ];
-
-    return services.some((service) => maps_apis.includes(service));
 }
 
 function showKey(keyName: string) {
     gapi.client.apikeys.projects.locations.keys.getKeyString(
-                { name: keyName }).then((response) => {
-        const result = response.result;
-        document.getElementById('key')!.innerHTML = result.keyString || '';
-    });
+        { name: keyName }).then((response) => {
+            const result = response.result;
+            document.getElementById('key')!.innerHTML = result.keyString || '';
+        });
 }
 
 function handleAuthClick() {
