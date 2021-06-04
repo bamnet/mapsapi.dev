@@ -1,1 +1,1 @@
-import './styles/privacy.css'
+import './styles/privacy.css';
