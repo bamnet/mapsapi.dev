@@ -87,3 +87,41 @@ export async function hasMaps(project: string) {
 
     return services.some((service) => maps_apis.includes(service));
 };
+
+/**
+ * listKeys gets metadata about all the keys associated with a project.
+ * 
+ * @param projectNumber Cloud project number to lookup keys from.
+ * @returns Array of Key metadata objects.
+ */
+export async function listKeys(projectNumber: string) {
+    const keys = await gapi.client.apikeys.projects.locations.keys.list(
+        { parent: `projects/${projectNumber}/locations/global` }
+    );
+
+    if (keys.result.keys == undefined) {
+        return [];
+    }
+
+    return keys.result.keys.map((key) => {
+        const restrictions: string[] = [];
+        if (key.restrictions?.androidKeyRestrictions?.allowedApplications) {
+            key.restrictions.androidKeyRestrictions.allowedApplications.forEach(a => {
+                if (a.packageName) {
+                    restrictions.push(a.packageName);
+                }
+            });
+        }
+        if (key.restrictions?.browserKeyRestrictions?.allowedReferrers) {
+            const referers = key.restrictions.browserKeyRestrictions.allowedReferrers.map(k => {
+                // TODO(bamnet): Get confirmation in case 34401236 to see if this is correct.
+                return k.replace(/^__file_url__\//, 'file://');
+            });
+            restrictions.push(...referers);
+        }
+        if (key.restrictions?.iosKeyRestrictions?.allowedBundleIds) {
+            restrictions.push(...key.restrictions.iosKeyRestrictions.allowedBundleIds);
+        }
+        return <Key>{ name: key.name, sites: restrictions };
+    });
+}

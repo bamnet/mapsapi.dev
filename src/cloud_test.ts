@@ -1,4 +1,4 @@
-import { CloudProject, CloudResourceManagerV1Project, hasMaps, listProjects } from "./cloud";
+import { CloudProject, CloudResourceManagerV1Project, hasMaps, listKeys, listProjects } from './cloud';
 
 describe('listProjects', function () {
   beforeEach(() => {
@@ -84,5 +84,83 @@ describe('hasMaps', function () {
 
     const result = await hasMaps('projects/NO_MAPS');
     expect(result).toBeFalse();
+  });
+});
+
+describe('listKeys', function () {
+  beforeEach(() => {
+    (global as any).gapi = {
+      client: { apikeys: { projects: { locations: { keys: { list: () => { } } } } } }
+    };
+  });
+
+  it('lists key metadata', async function () {
+    spyOn(gapi.client.apikeys.projects.locations.keys, 'list').and.resolveTo({
+      result: {
+        keys: [
+          { name: 'projects/123/locations/global/keys/unrestricted-key' },
+          {
+            name: 'projects/123/locations/global/keys/http-restrictions',
+            restrictions: {
+              browserKeyRestrictions: {
+                allowedReferrers: ['http://localhost:8080', 'http://test.com/page']
+              }
+            }
+          }, {
+            name: 'projects/123/locations/global/keys/android-restrictions',
+            restrictions: {
+              androidKeyRestrictions: {
+                allowedApplications: [{ packageName: 'com.my.android.package' }]
+              }
+            }
+          }, {
+            name: 'projects/123/locations/global/keys/ios-restrictions',
+            restrictions: {
+              iosKeyRestrictions: {
+                allowedBundleIds: ['com.my.ios.package']
+              }
+            }
+          },
+        ],
+      },
+      body: '',
+    });
+
+    const result = await listKeys('123');
+    expect(result).toEqual([
+      { name: 'projects/123/locations/global/keys/unrestricted-key', sites: [] },
+      { name: 'projects/123/locations/global/keys/http-restrictions', sites: ['http://localhost:8080', 'http://test.com/page'] },
+      { name: 'projects/123/locations/global/keys/android-restrictions', sites: ['com.my.android.package'] },
+      { name: 'projects/123/locations/global/keys/ios-restrictions', sites: ['com.my.ios.package'] },
+    ]);
+  });
+
+  it('handles no keys', async function () {
+    spyOn(gapi.client.apikeys.projects.locations.keys, 'list').and.resolveTo({
+      result: {},
+      body: '',
+    });
+
+    const result = await listKeys('empty');
+    expect(result).toEqual([]);
+  });
+
+  it('formats file keys correctly', async function () {
+    spyOn(gapi.client.apikeys.projects.locations.keys, 'list').and.resolveTo({
+      result: {
+        keys: [{
+          name: 'file_key',
+          restrictions: {
+            browserKeyRestrictions: {
+              allowedReferrers: ['__file_url__//path/to/']
+            }
+          }
+        }]
+      },
+      body: '',
+    });
+
+    const result = await listKeys('empty');
+    expect(result).toEqual([{ name: 'file_key', sites: ['file:///path/to/'] }]);
   });
 });

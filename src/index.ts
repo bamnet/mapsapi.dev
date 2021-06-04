@@ -1,6 +1,6 @@
 import './styles/main.css'
 
-import { listProjects, CloudProject, Key } from './cloud';
+import { listProjects, CloudProject, listKeys } from './cloud';
 
 const API_KEY_API_DISCOVERY = 'https://apikeys.googleapis.com/$discovery/rest?version=v2';
 const CLOUD_RESOURCE_MANAGER_API_DISCOVERY = 'https://cloudresourcemanager.googleapis.com/$discovery/rest?version=v1';
@@ -110,34 +110,6 @@ async function projectSummary() {
         obj.then(obj => obj[proj.number] = proj);
         return obj;
     }, Promise.resolve(<{ [key: string]: CloudProject; }>{}));
-}
-
-async function listKeys(projectNumber: string) {
-    const keys = await gapi.client.apikeys.projects.locations.keys.list(
-        { parent: `projects/${projectNumber}/locations/global` }
-    );
-
-    if (keys.result.keys == undefined) {
-        return [];
-    }
-
-    return keys.result.keys.map((key) => {
-        const restrictions: string[] = [];
-        if (key.restrictions?.androidKeyRestrictions?.allowedApplications) {
-            key.restrictions.androidKeyRestrictions.allowedApplications.forEach(a => {
-                if (a.packageName) {
-                    restrictions.push(a.packageName);
-                }
-            });
-        }
-        if (key.restrictions?.browserKeyRestrictions?.allowedReferrers) {
-            restrictions.push(...key.restrictions.browserKeyRestrictions.allowedReferrers);
-        }
-        if (key.restrictions?.iosKeyRestrictions?.allowedBundleIds) {
-            restrictions.push(...key.restrictions.iosKeyRestrictions.allowedBundleIds);
-        }
-        return <Key>{ name: key.name, sites: restrictions };
-    });
 }
 
 function showKey(keyName: string) {
