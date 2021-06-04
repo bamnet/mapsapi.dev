@@ -1,7 +1,6 @@
 import './styles/main.css'
 
-import { hasMaps } from './cloud';
-import { asyncFilter } from './util';
+import { listProjects, CloudProject, Key } from './cloud';
 
 const API_KEY_API_DISCOVERY = 'https://apikeys.googleapis.com/$discovery/rest?version=v2';
 const CLOUD_RESOURCE_MANAGER_API_DISCOVERY = 'https://cloudresourcemanager.googleapis.com/$discovery/rest?version=v1';
@@ -102,26 +101,6 @@ function authChange() {
             e.classList.remove('hidden');
         });
     }
-}
-
-interface CloudProject {
-    name: string;
-    number: string;
-    keys: Key[];
-}
-
-interface Key {
-    name: string;
-    sites: string[];
-}
-
-async function listProjects() {
-    const projectResp = await gapi.client.cloudresourcemanager.projects.list();
-    const projects = (projectResp.result.projects || []).map(
-        (p: any) => (<CloudProject>{ name: p.name, number: p.projectNumber, keys: [] })
-    );
-
-    return asyncFilter(projects, async (project) => await hasMaps(`projects/${project.number}`));
 }
 
 async function projectSummary() {
