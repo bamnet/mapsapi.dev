@@ -81,6 +81,7 @@ function authChange() {
       let selected = '';
 
       select.innerHTML = ''; // Remove the placeholder
+      console.info(`Found ${Object.keys(projects).length} possible projects.`);
       Object.keys(projects).forEach(number => {
         const summary = projects[number];
         if (selected === '') {
@@ -98,6 +99,12 @@ function authChange() {
           }
         }
       });
+      if (Object.keys(projects).length > 1) {
+        const altElem = <HTMLDivElement>document.getElementById('alternatives');
+        altElem.classList.remove('hidden');
+        const altCount = <HTMLSpanElement>document.getElementById('altCount');
+        altCount.innerText = `${Object.keys(projects).length - 1}`;
+      }
     });
   } else {
     btn.innerHTML = 'Sign In';
