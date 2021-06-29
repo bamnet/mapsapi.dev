@@ -83,10 +83,19 @@ export async function hasMaps(project: string) {
     s.name!.slice(`${project}/services/`.length)
   );
   const maps_apis = [
-    // TODO(bamnet): This list is woefully inadequate.
-    'geocoding-backend.googleapis.com',
     'maps-backend.googleapis.com',
+    'geocoding-backend.googleapis.com',
+    'places-backend.googleapis.com',
+    'directions-backend.googleapis.com',
+    'distance-matrix-backend.googleapis.com',
+    'geolocation.googleapis.com',
     'elevation-backend.googleapis.com',
+    'maps-embed-backend.googleapis.com',
+    'maps-android-backend.googleapis.com',
+    'maps-ios-backend.googleapis.com',
+    'static-maps-backend.googleapis.com',
+    'roads.googleapis.com',
+    'street-view-image-backend.googleapis.com',
     'timezone-backend.googleapis.com',
   ];
 
