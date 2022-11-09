@@ -32,7 +32,7 @@
     "css-loader": "^5.2.7",
     "css-minimizer-webpack-plugin": "^2.0.0",
     "glob-parent": "^6.0.1",
-    "gts": "^3.1.0",
+    "gts": "^3.1.1",
     "html-webpack-plugin": "^5.3.2",
     "jasmine": "^3.9.0",
     "mini-css-extract-plugin": "^1.6.2",
